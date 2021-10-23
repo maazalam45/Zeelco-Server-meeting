@@ -12,7 +12,7 @@ const io = new Server(server, {
 });
 const port = 8000;
 let shared_peer = null
-let screenshare = false
+// let screenshare = false
 
 app.use("*", cors());
 
@@ -66,25 +66,6 @@ io.on("connection", (socket) => {
           console.log(err, "hhhhhhhhh");
         } else {
           console.log(res[0])
-          // console.log(res,'aaaaaaaaaaaaaaaaaaaaaaaaaa')
-          // if(connids.length==0){
-          //   connids.push(res[0]);
-          // }
-          // else{
-          //   connids.forEach((element,i)=>{
-          //     if(element.user_id==e.userid){
-          //       connids[i].peer_id=element.peer_id
-          //       console.log(element.user_id,e.userid,'aslkdj')
-          //     }
-          //     else{
-          //       if(element.user_id!=e.userid){
-          //         console.log('asd;llkmkmck')
-          //         connids.push(res[0]);
-          //       }
-          //     }
-          //   })
-          // }
-
           if (res.length == 0) {
             pool.query(
               `INSERT INTO members(user_id,meeting_id,time,status,peer_id,socket_id) VALUES (?,?,?,?,?,?)`,
@@ -96,16 +77,14 @@ io.on("connection", (socket) => {
                   socket.join(e.meetingid);
                   console.log("room connected");
                   pool.query(
-                    `select * from members where status=1 and meeting_id=?`,
+                    `SELECT members.id,members.user_id,members.meeting_id,members.time,.members.status,members.peer_id,members.Screen_share_peer,members.socket_id,members.Sharing_status,users.name,users.profile_pic,users.account_type FROM members INNER JOIN users on members.user_id = users.id where members.status=1 and members.meeting_id=1`,
                     [e.meetingid],
                     (er, re) => {
                       if (er) {
                         console.log(er);
                       } else {
                         io.to(e.meetingid).emit("User_Connected", re);
-                        // socket.emit("peer_id", re[0].peer_id);
                         socket.to(socket.id).emit('call', re)
-                        // console.log(re, "lllllllll");
                       }
                     }
                   );
@@ -124,7 +103,7 @@ io.on("connection", (socket) => {
                   console.log(errr, "jj");
                 } else {
                   pool.query(
-                    `select * from members where status=1 and meeting_id=?`,
+                    `SELECT members.id,members.user_id,members.meeting_id,members.time,.members.status,members.peer_id,members.Screen_share_peer,members.socket_id,members.Sharing_status,users.name,users.profile_pic,users.account_type FROM members INNER JOIN users on members.user_id = users.id where members.status=1 and members.meeting_id=1`,
                     [e.meetingid],
                     (er, re) => {
                       if (er) {
@@ -227,6 +206,7 @@ io.on("connection", (socket) => {
     console.log(e, status, 'asssccc')
     shared_peer = socket.id
     pool.query(`update members set Sharing_status=1 where socket_id=?`, socket.id)
+    console.log("step 2 sharing")
     io.to(e.room).emit("getScreenshare", e)
   })
 
