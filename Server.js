@@ -206,8 +206,8 @@ io.on("connection", (socket) => {
     console.log(e, status, 'asssccc')
     shared_peer = socket.id
     pool.query(`update members set Sharing_status=1 where socket_id=?`, socket.id)
-    console.log("step 2 sharing")
     io.to(e.room).emit("getScreenshare", e)
+    console.log("step 2 sharing")
   })
 
   socket.on("disconnect", (e) => {
